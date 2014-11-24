@@ -9,38 +9,34 @@ import java.net.Socket;
  */
 public class SocketServer {
 
-    private ServerSocket serverSocket;
-    private int port;
+    private int _port;
+    ServerSocket serverSocket;
 
     public SocketServer(int port) {
-        this.port = port;
+        _port = port;
     }
 
     public void start() throws IOException {
-        System.out.println("Starting socket server at port: " + port);
-        serverSocket = new ServerSocket(port);
+        System.out.println("Starting server at port: " + _port);
+        serverSocket = new ServerSocket(_port);
 
         // Listen for clients. Block until connection
 
-        System.out.println("Waiting for clients");
-        Socket client = serverSocket.accept();
+        while (true) {
+            System.out.println("Waiting for clients");
+            Socket client = serverSocket.accept();
+            System.out.println("Client has connected.");
 
-        // Client connected!
-        sendWelcomeMessage(client);
-    }
-
-    private void sendWelcomeMessage(Socket client) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-        writer.write("Hello. You are connected to a simple socket server.");
-        writer.flush();
-        writer.close();
+            Thread thread = new Thread(new ClientHandler(client));
+            thread.start();
+        }
     }
 
     /**
      * Main driver for server
      */
     public static void main(String[] args) {
-        int portNumber = 9000;
+        int portNumber = 16000;
 
         try {
             SocketServer socketServer = new SocketServer(portNumber);

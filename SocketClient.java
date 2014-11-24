@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -31,10 +29,18 @@ public class SocketClient {
         }
     }
 
+    public void sendUserID() throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream()));
+        writer.write("MY_ID");
+        writer.newLine();
+        writer.flush();
+    }
+
     public static void main(String args[]) {
-        SocketClient client = new SocketClient("localhost", 9000);
+        SocketClient client = new SocketClient("localhost", 16000);
         try {
             client.connect();
+            client.sendUserID();
             client.readResponse();
         } catch (UnknownHostException e) {
             System.err.println("Host unknown.");
