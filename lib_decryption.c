@@ -2,9 +2,9 @@
 #include "Decryption.h"
 
 JNIEXPORT void JNICALL Java_Decryption_decrypt
-(JNIEnv *env, jobject object, long *v, long *k) {
+(JNIEnv *env, jobject object, jint *l, jint *r, jint *k) {
 	/* TEA decryption routine */
-	unsigned long n=32, sum, y=v[0], z=v[1];
+	unsigned long n=32, sum, y = *l, z = *r;
 	unsigned long delta=0x9e3779b9l;
 
 	sum = delta<<5;
@@ -13,6 +13,6 @@ JNIEXPORT void JNICALL Java_Decryption_decrypt
 		y -= (z<<4) + k[0] ^ z + sum ^ (z>>5) + k[1];
 		sum -= delta;
 	}
-	v[0] = y;
-	v[1] = z;
+	*l = y;
+	*r = z;
 }

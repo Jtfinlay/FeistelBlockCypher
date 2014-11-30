@@ -5,12 +5,14 @@ import java.net.UnknownHostException;
 public class SocketClient {
 
     private String _hostname;
+    private Encryption _encrypter;
     private int _port;
     Socket socketClient;
 
     public SocketClient(String hostname, int port) {
         _hostname = hostname;
         _port = port;
+        _encrypter = new Encryption();
     }
 
     public void connect() throws UnknownHostException, IOException {
@@ -31,7 +33,7 @@ public class SocketClient {
 
     public void sendUserID() throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream()));
-        writer.write("MY_ID");
+        writer.write(_encrypter.encrypt("MY_ID", 10));
         writer.newLine();
         writer.flush();
     }
