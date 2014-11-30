@@ -1,17 +1,21 @@
 #include <jni.h>
+#include <stdlib.h>
 #include "Encryption.h"
+
+void encrypt(long *v, long *k);
+void decrypt(long *v, long *k);
 
 JNIEXPORT jbyteArray JNICALL Java_Encryption_encryptArray
 (JNIEnv *env, jobject object, jbyteArray v, jbyteArray key)
 {
     jsize len_key, len_v;
-    jbyte* buff_key, buff_v, ptr;
+    jbyte *buff_key, *buff_v, *ptr;
     jboolean isCopyk, isCopyv;
     jbyteArray result;
 
     len_key = (*env)->GetArrayLength(env, key);
-    len_v = (*env)->GetArrayLength(env, v)
-    if (len_key != 4)
+    len_v = (*env)->GetArrayLength(env, v);
+    if (len_key != 4*sizeof(long))
     {
         printf("Key is wrong size\n");
         exit(0);
@@ -23,13 +27,13 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_encryptArray
     }
 
     buff_key = (*env)->GetByteArrayElements(env, key, &isCopyk);
-    buff_v = (*env)->GetByteArrayElements(env, v, %isCopyv);
+    buff_v = (*env)->GetByteArrayElements(env, v, &isCopyv);
 
-    ptr = bff_v;
-    while (ptr < bff_v + len_v)
+    ptr = buff_v;
+    while (ptr < buff_v + len_v)
     {
-        encrypt((long*)buff_v, (long*)buff_key);
-        ptr += 4;
+        encrypt((long*)ptr, (long*)buff_key);
+        ptr += 4*sizeof(long);
     }
 
     result = (*env)->NewByteArray(env, len_v);
@@ -37,6 +41,44 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_encryptArray
 
     return result;
 }
+
+JNIEXPORT jbyteArray JNICALL Java_Encryption_decryptArray
+(JNIEnv *env, jobject object, jbyteArray v, jbyteArray key)
+{
+    jsize len_key, len_v;
+    jbyte *buff_key, *buff_v, *ptr;
+    jboolean isCopyk, isCopyv;
+    jbyteArray result;
+
+    len_key = (*env)->GetArrayLength(env, key);
+    len_v = (*env)->GetArrayLength(env, v);
+    if (len_key != 4*sizeof(long))
+    {
+        printf("Key is wrong size\n");
+        exit(0);
+    }
+    if (len_v % 4 != 0)
+    {
+        printf("Values must be padded\n");
+        exit(0);
+    }
+
+    buff_key = (*env)->GetByteArrayElements(env, key, &isCopyk);
+    buff_v = (*env)->GetByteArrayElements(env, v, &isCopyv);
+
+    ptr = buff_v;
+    while (ptr < buff_v + len_v)
+    {
+        decrypt((long*)ptr, (long*)buff_key);
+        ptr += 4*sizeof(long);
+    }
+
+    result = (*env)->NewByteArray(env, len_v);
+    (*env)->SetByteArrayRegion(env, result, 0, len_v, buff_v);
+
+    return result;
+}
+
 
 void encrypt (long *v, long *k){
     /* TEA encryption algorithm */
