@@ -59,7 +59,10 @@ public class SocketClient {
         {
             System.out.println("File does not exist");
             return false;
+        } else if (new String(contents).startsWith(Statics.RESPONSE_ACK)) {
+            return readFileResponse();
         }
+
 
         File f = new File("hi.txt"); // TODO - Proper file name
         FileOutputStream fout = new FileOutputStream(f);
@@ -108,10 +111,7 @@ public class SocketClient {
                 System.out.println("\nPlease enter a file name, or 'q' to quit.");
             }
 
-
             client.sendComplete();
-
-
 
         } catch (UnknownHostException e) {
             System.err.println("Host unknown.");

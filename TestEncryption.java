@@ -9,9 +9,9 @@ public class TestEncryption {
         System.loadLibrary("encryption");
 
         byte[] encrypted = _encrypt.encrypt("I never want to feel like I did that day.", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        String decrypted = _encrypt.decrypt(encrypted, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        byte[] decrypted = _encrypt.decrypt(encrypted, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-	System.out.println("Decrypted: " + decrypted);
+	System.out.println("Decrypted: " + new String(decrypted));
 	
     }
 }

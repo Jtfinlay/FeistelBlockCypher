@@ -23,7 +23,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            readResponse();
+            while (true) { readResponse(); }
         } catch (IOException e) {
             e.printStackTrace();
         }
