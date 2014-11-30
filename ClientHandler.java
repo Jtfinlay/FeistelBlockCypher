@@ -39,14 +39,14 @@ public class ClientHandler implements Runnable {
         in.readFully(message, 0, message.length);
 
         for (User u : _server.getUserList()) {
-            String decrypted = _encrypter.decrypt(message, u.key);
-            if (decrypted.startsWith(Statics.ACTION_AUTHENTICATE)) {
+            byte[] decrypted = _encrypter.decrypt(message, u.key);
+            if (new String(decrypted).startsWith(Statics.ACTION_AUTHENTICATE)) {
                 /** AUTHENTICATE USER **/
                 authenticateUser(u);
                 return;
-            } else if (decrypted.startsWith(Statics.ACTION_SENDFILE)) {
+            } else if (new String(decrypted).startsWith(Statics.ACTION_SENDFILE)) {
                 /** TRANSMIT FILE **/
-                String fileName = decrypted.substring(4);
+                String fileName = new String(decrypted).substring(4);
                 if (u.authenticated) {
                     transmitFile(u, fileName);
                 } else {
@@ -54,7 +54,7 @@ public class ClientHandler implements Runnable {
                     transmitDenied();
                 }
                 return;
-            } else if (decrypted.startsWith(Statics.ACTION_FINISHED)) {
+            } else if (new String(decrypted).startsWith(Statics.ACTION_FINISHED)) {
                 /** ALL DONE! **/
                 _client.close();
                 return;
@@ -76,7 +76,20 @@ public class ClientHandler implements Runnable {
         /** Transmit Acknowledgement **/
         transmit(_encrypter.encrypt(Statics.RESPONSE_ACK, user.key));
 
-        // TODO - Transmit File
+        /** Find file **/
+        File f = new File(fileName);
+        if (!f.exists() || f.isDirectory())
+        {
+            transmit(_encrypter.encrypt(Statics.RESPONSE_FILEDNE, user.key));
+            return;
+        }
+
+        /** Send file **/
+        FileInputStream fin = new FileInputStream(f);
+        byte[] fileContent = new byte[(int)f.length()];
+        fin.read(fileContent);
+        fin.close();
+        transmit(_encrypter.encrypt(fileContent, user.key));
 
         /** Transmit Done **/
         transmit(_encrypter.encrypt(Statics.ACTION_FINISHED, user.key));

@@ -15,24 +15,26 @@ public class Encryption {
 
     public byte[] encrypt(String s, String k)
     {
-        int l = s.length();
+//        byte[] v = ByteBuffer.allocate(l).put(s.getBytes(Charset.defaultCharset())).array();
+        return encrypt(s.getBytes(), k);
+    }
+    public byte[] encrypt(byte[] s, String k)
+    {
+        int l = s.length;
         while (l % 16 != 0) l++;
 
-        byte[] v = ByteBuffer.allocate(l).put(s.getBytes(Charset.defaultCharset())).array();
-	byte[] key = ByteBuffer.allocate(32).put(k.getBytes(Charset.defaultCharset())).array();
+        byte[] v = ByteBuffer.allocate(l).put(s).array();
+	    byte[] key = ByteBuffer.allocate(32).put(k.getBytes(Charset.defaultCharset())).array();
 
         byte[] result = encryptArray(v, key);
 
         return result;
     }
 
-    public String decrypt(byte[] v, String k)
+    public byte[] decrypt(byte[] v, String k)
     {
         byte[] key = ByteBuffer.allocate(32).put(k.getBytes(Charset.defaultCharset())).array();
-
-        byte[] result = decryptArray(v, key);
-
-        return new String(result, Charset.defaultCharset());
+        return decryptArray(v, key);
     }
 
 
