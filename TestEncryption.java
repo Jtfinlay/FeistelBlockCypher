@@ -7,13 +7,11 @@ public class TestEncryption {
     {
         Encryption _encrypt = new Encryption();
         System.loadLibrary("encryption");
-        String encrypted = _encrypt.encrypt("Apple", 1);
 
-        System.out.println("Encrypted: " + encrypted);
+        byte[] encrypted = _encrypt.encrypt("I never want to feel like I did that day.", 1);
+        String decrypted = _encrypt.decrypt(encrypted, 1);
 
-//        String decrypted = _encrypt.decrypt(encrypted, 1);
-	//System.out.println("Decrypted: " + decrypted);
-
+	System.out.println("Decrypted: " + decrypted);
 	
     }
 }
