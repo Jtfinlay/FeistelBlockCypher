@@ -1,8 +1,6 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 /**
  * Created by James on 11/24/2014.
@@ -13,8 +11,7 @@ public class ClientHandler implements Runnable {
     private SocketServer _server;
     private Encryption _encrypter;
 
-    private static final String ACTION_AUTHENTICATE = "USER";
-    private static final String ACTION_SENDFILE = "FILE";
+
 
 
     public ClientHandler(SocketServer server, Socket client) {
@@ -33,45 +30,67 @@ public class ClientHandler implements Runnable {
     }
 
     private void readResponse() throws IOException {
-        String userInput;
         DataInputStream in = new DataInputStream(_client.getInputStream());
 
         int length = in.readInt();
-        if (length > 0)
-        {
-            byte[] message = new byte[length];
-            in.readFully(message, 0, message.length);
+        if (length <= 0) return;
 
-            for (User u : _server.getUserList())
-            {
-                String decrypted = _encrypter.decrypt(message, u.key);
-                if (decrypted.startsWith(ACTION_AUTHENTICATE))
-                {
-                    authenticateUser(u);
-                }  else if (decrypted.startsWith(ACTION_SENDFILE))
-                {
-                    String fileName = decrypted.substring(4);
-                    if (u.authenticated)
-                    {
-                        transmitFile(fileName);
-                    } else {
-                        System.out.println(u.name + " tried to access " + fileName +
-                                " but is not authenticated");
-                    }
+        byte[] message = new byte[length];
+        in.readFully(message, 0, message.length);
+
+        for (User u : _server.getUserList()) {
+            String decrypted = _encrypter.decrypt(message, u.key);
+            if (decrypted.startsWith(Statics.ACTION_AUTHENTICATE)) {
+                /** AUTHENTICATE USER **/
+                authenticateUser(u);
+                return;
+            } else if (decrypted.startsWith(Statics.ACTION_SENDFILE)) {
+                /** TRANSMIT FILE **/
+                String fileName = decrypted.substring(4);
+                if (u.authenticated) {
+                    transmitFile(u, fileName);
+                } else {
+                    System.out.println(u.name + " is not authenticated");
+                    transmitDenied();
                 }
-
+                return;
+            } else if (decrypted.startsWith(Statics.ACTION_FINISHED)) {
+                /** ALL DONE! **/
+                _client.close();
+                return;
             }
         }
+        System.out.println("Could not find key for client.");
+        transmitDenied();
     }
 
-    private void authenticateUser(User user)
-    {
-         user.authenticated = true;
+    private void authenticateUser(User user) throws IOException {
+        user.authenticated = true;
+        System.out.println("Authenticated: " + user.name);
+
+        byte[] msg = _encrypter.encrypt(Statics.RESPONSE_AUTHENTICATED, user.key);
+        transmit(msg);
     }
 
-    private void transmitFile(String fileName)
-    {
+    private void transmitFile(User user, String fileName) throws IOException {
+        /** Transmit Acknowledgement **/
+        transmit(_encrypter.encrypt(Statics.RESPONSE_ACK, user.key));
 
+        // TODO - Transmit File
+
+        /** Transmit Done **/
+        transmit(_encrypter.encrypt(Statics.ACTION_FINISHED, user.key));
+    }
+
+    private void transmitDenied() throws IOException {
+        transmit(Statics.RESPONSE_DENIED.getBytes());
+        _client.close();
+    }
+
+    private void transmit(byte[] message) throws IOException {
+        DataOutputStream out = new DataOutputStream(_client.getOutputStream());
+        out.writeInt(message.length);
+        out.write(message);
     }
 
 }

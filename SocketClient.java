@@ -24,21 +24,37 @@ public class SocketClient {
         System.out.println("Connection established");
     }
 
-    public void readResponse() throws IOException {
-        String userInput;
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+    public boolean readAuthenticationResponse() throws IOException {
+        byte[] message = receive();
 
-        System.out.println("Response from server:");
-        while ((userInput = stdIn.readLine()) != null) {
-            System.out.println(userInput);
-        }
+        if (new String(message).startsWith(Statics.RESPONSE_DENIED))
+            return false;
+
+        String msg = _encrypter.decrypt(message, _key);
+
+        if (msg.startsWith(Statics.ACTION_AUTHENTICATE))
+            return true;
+
+        return false;
     }
 
     public void sendUserID() throws IOException {
-        byte[] message = _encrypter.encrypt("USER"+_userID, _key);
+        transmit(_encrypter.encrypt("USER" + _userID, _key));
+    }
+
+    private void transmit(byte[] message) throws IOException {
         DataOutputStream out = new DataOutputStream(socketClient.getOutputStream());
         out.writeInt(message.length);
         out.write(message);
+    }
+
+    private byte[] receive() throws IOException {
+        DataInputStream in = new DataInputStream(socketClient.getInputStream());
+
+        byte[] message = new byte[in.readInt()];
+        in.readFully(message, 0, message.length);
+
+        return message;
     }
 
     public static void main(String args[]) {
@@ -46,7 +62,19 @@ public class SocketClient {
         try {
             client.connect();
             client.sendUserID();
-            client.readResponse();
+
+            /** AUTHENTICATE **/
+            if (!client.readAuthenticationResponse())
+            {
+                System.out.println("Could not authenticate.");
+                return;
+            }
+
+            System.out.println("Authentication successful.");
+            System.out.println("Please enter a file name, or 'q' to quit.");
+
+
+
         } catch (UnknownHostException e) {
             System.err.println("Host unknown.");
         } catch (IOException e) {
