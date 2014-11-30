@@ -3,14 +3,13 @@
  */
 public class Encryption {
 
-    public Encryption()
-    {
-        System.loadLibrary("encrypt");
+    static {
+      System.loadLibrary("encryption");
     }
 
-    public native void encrypt(int l, int r, int k);
+    private native void encrypt(int l, int r, int k);
 
-    public String encrypt(String s, int k)
+    public String encrypt_s(String s, int k)
     {
         int l;
         int[] input, output;

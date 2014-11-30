@@ -33,7 +33,7 @@ public class SocketClient {
 
     public void sendUserID() throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream()));
-        writer.write(_encrypter.encrypt("MY_ID", 10));
+//        writer.write(_encrypter.encrypt("MY_ID", 10));
         writer.newLine();
         writer.flush();
     }
