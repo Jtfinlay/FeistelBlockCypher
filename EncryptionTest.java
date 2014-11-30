@@ -7,7 +7,7 @@ public class EncryptionTest {
     {
         Encryption _encrypt = new Encryption();
         System.loadLibrary("encryption");
-        String result = _encrypt.encrypt_s("Smile", 234567);
+        String result = _encrypt.encrypt("Smile", 234567);
         System.out.println("Result: " + result);
     }
 }
