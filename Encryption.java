@@ -13,22 +13,22 @@ public class Encryption {
     private native byte[] encryptArray(byte[] v, byte[] key);
     private native byte[] decryptArray(byte[] v, byte[] key);
 
-    public byte[] encrypt(String s, int k)
+    public byte[] encrypt(String s, String k)
     {
         int l = s.length();
         while (l % 16 != 0) l++;
 
         byte[] v = ByteBuffer.allocate(l).put(s.getBytes(Charset.defaultCharset())).array();
-	byte[] key = ByteBuffer.allocate(32).putInt(k).array();
+	byte[] key = ByteBuffer.allocate(32).put(k.getBytes(Charset.defaultCharset())).array();
 
         byte[] result = encryptArray(v, key);
 
         return result;
     }
 
-    public String decrypt(byte[] v, int k)
+    public String decrypt(byte[] v, String k)
     {
-        byte[] key = ByteBuffer.allocate(32).putInt(k).array();
+        byte[] key = ByteBuffer.allocate(32).put(k.getBytes(Charset.defaultCharset())).array();
 
         byte[] result = decryptArray(v, key);
 

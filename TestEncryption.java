@@ -8,8 +8,8 @@ public class TestEncryption {
         Encryption _encrypt = new Encryption();
         System.loadLibrary("encryption");
 
-        byte[] encrypted = _encrypt.encrypt("I never want to feel like I did that day.", 1);
-        String decrypted = _encrypt.decrypt(encrypted, 1);
+        byte[] encrypted = _encrypt.encrypt("I never want to feel like I did that day.", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        String decrypted = _encrypt.decrypt(encrypted, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 	System.out.println("Decrypted: " + decrypted);
 	
