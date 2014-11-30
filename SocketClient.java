@@ -4,10 +4,13 @@ import java.net.UnknownHostException;
 
 public class SocketClient {
 
-    private String _hostname;
     private Encryption _encrypter;
+    private String _hostname;
     private int _port;
     Socket socketClient;
+
+    private String _userID = "Frank";
+    private String _key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     public SocketClient(String hostname, int port) {
         _hostname = hostname;
@@ -16,7 +19,7 @@ public class SocketClient {
     }
 
     public void connect() throws UnknownHostException, IOException {
-        System.out.println("Ateemption to connect to "+_hostname+".");
+        System.out.println("Attempting to connect to "+_hostname+".");
         socketClient = new Socket(_hostname, _port);
         System.out.println("Connection established");
     }
@@ -32,10 +35,10 @@ public class SocketClient {
     }
 
     public void sendUserID() throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream()));
-//        writer.write(_encrypter.encrypt("MY_ID", 10));
-        writer.newLine();
-        writer.flush();
+        byte[] message = _encrypter.encrypt("USER"+_userID, _key);
+        DataOutputStream out = new DataOutputStream(socketClient.getOutputStream());
+        out.writeInt(message.length);
+        out.write(message);
     }
 
     public static void main(String args[]) {

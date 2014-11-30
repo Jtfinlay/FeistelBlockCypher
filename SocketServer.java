@@ -1,8 +1,9 @@
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Socket server
@@ -10,10 +11,18 @@ import java.net.Socket;
 public class SocketServer {
 
     private int _port;
+    public List<User> _users;
+
     ServerSocket serverSocket;
 
     public SocketServer(int port) {
         _port = port;
+        _users = new ArrayList<User>();
+
+        _users.add(new User("Frank", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+        _users.add(new User("Stephen", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+        _users.add(new User("Carl", "cccccccccccccccccccccccccccccccc"));
+        _users.add(new User("Scott", "dddddddddddddddddddddddddddddddd"));
     }
 
     public void start() throws IOException {
@@ -27,9 +36,14 @@ public class SocketServer {
             Socket client = serverSocket.accept();
             System.out.println("Client has connected.");
 
-            Thread thread = new Thread(new ClientHandler(client));
+            Thread thread = new Thread(new ClientHandler(this, client));
             thread.start();
         }
+    }
+
+    public List<User> getUserList()
+    {
+        return _users;
     }
 
     /**
