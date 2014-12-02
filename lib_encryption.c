@@ -20,7 +20,7 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_encryptArray
         printf("Key is wrong size\n");
         exit(0);
     }
-    if (len_v % 4 != 0)
+    if (len_v % 2*sizeof(long) != 0)
     {
         printf("Values must be padded\n");
         exit(0);
@@ -33,7 +33,7 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_encryptArray
     while (ptr < buff_v + len_v)
     {
         encrypt((long*)ptr, (long*)buff_key);
-        ptr += 4*sizeof(long);
+        ptr += 2*sizeof(long);
     }
 
     result = (*env)->NewByteArray(env, len_v);
@@ -57,7 +57,7 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_decryptArray
         printf("Key is wrong size\n");
         exit(0);
     }
-    if (len_v % 4 != 0)
+    if (len_v % 2*sizeof(long) != 0)
     {
         printf("Values must be padded\n");
         exit(0);
@@ -70,7 +70,7 @@ JNIEXPORT jbyteArray JNICALL Java_Encryption_decryptArray
     while (ptr < buff_v + len_v)
     {
         decrypt((long*)ptr, (long*)buff_key);
-        ptr += 4*sizeof(long);
+        ptr += 2*sizeof(long);
     }
 
     result = (*env)->NewByteArray(env, len_v);

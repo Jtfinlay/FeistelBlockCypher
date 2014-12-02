@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,7 +26,7 @@ public class SocketServer {
         _users.add(new User("Scott", "dddddddddddddddddddddddddddddddd"));
     }
 
-    public void start() throws IOException {
+    public void start(String dir) throws IOException {
         System.out.println("Starting server at port: " + _port);
         serverSocket = new ServerSocket(_port);
 
@@ -36,7 +37,7 @@ public class SocketServer {
             Socket client = serverSocket.accept();
             System.out.println("Client has connected.");
 
-            Thread thread = new Thread(new ClientHandler(this, client));
+            Thread thread = new Thread(new ClientHandler(this, client, dir));
             thread.start();
         }
     }
@@ -52,10 +53,25 @@ public class SocketServer {
     public static void main(String[] args) {
         int portNumber = 16000;
 
+        if (args.length != 1)
+        {
+            System.out.println("Error - Expect 1 param: Upload directory.");
+            return;
+        }
+
+        /** Ensure download directory exists **/
+        File f = new File(args[0]);
+        if (!f.exists() || !f.isDirectory())
+        {
+            System.out.println("Given directory could not be found: " + args[0]);
+            return;
+        }
+
         try {
             SocketServer socketServer = new SocketServer(portNumber);
-            socketServer.start();
+            socketServer.start(args[0]);
         } catch (IOException e) {
+            System.out.println("Server error");
             e.printStackTrace();
         }
     }

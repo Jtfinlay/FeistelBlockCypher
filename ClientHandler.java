@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 /**
@@ -10,17 +11,23 @@ public class ClientHandler implements Runnable {
     private Socket _client;
     private SocketServer _server;
     private Encryption _encrypter;
+    private String _dir;
 
-    public ClientHandler(SocketServer server, Socket client) {
+    public ClientHandler(SocketServer server, Socket client, String dir) throws IOException {
         _server = server;
         _client = client;
         _encrypter = new Encryption();
+        _dir = new File(dir).getCanonicalPath();
     }
 
     @Override
     public void run() {
         try {
-            while (true) { readResponse(); }
+            while (true) {
+                readResponse();
+            }
+        } catch (SocketException e) {
+            System.out.println("Connect to client lost.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,9 +81,24 @@ public class ClientHandler implements Runnable {
         transmit(_encrypter.encrypt(Statics.RESPONSE_ACK, user.key));
 
         /** Find file **/
-        File f = new File(fileName);
+        File f = new File(_dir, fileName);
         if (!f.exists() || f.isDirectory())
         {
+            transmit(_encrypter.encrypt(Statics.RESPONSE_FILEDNE, user.key));
+            return;
+        }
+
+        if (!f.getCanonicalPath().startsWith(_dir))
+        {
+            System.out.println("File not in uploading directory: " + f.getCanonicalPath());
+            transmit(_encrypter.encrypt(Statics.RESPONSE_FILEDNE, user.key));
+            return;
+        }
+
+        /** File size **/
+        if (f.length() > Integer.MAX_VALUE - 25)
+        {
+            System.out.println(fileName + " is too large to send.");
             transmit(_encrypter.encrypt(Statics.RESPONSE_FILEDNE, user.key));
             return;
         }

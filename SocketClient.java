@@ -10,10 +10,12 @@ public class SocketClient {
     private int _port;
     Socket socketClient;
 
-    private String _userID = "Frank";
-    private String _key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    private String _userID;
+    private String _key;
 
-    public SocketClient(String hostname, int port, String directory) {
+    public SocketClient(String hostname, int port, String userID, String key, String directory) {
+        _userID = userID;
+        _key = key;
         _hostname = hostname;
         _port = port;
         _encrypter = new Encryption();
@@ -65,8 +67,8 @@ public class SocketClient {
             return readFileResponse(fileName);
         }
 
-
-        File f = new File(_dir + fileName);
+        File tmp = new File(fileName);
+        File f = new File(_dir, tmp.getName());
         FileOutputStream fout = new FileOutputStream(f);
         fout.write(contents);
         fout.close();
@@ -96,15 +98,22 @@ public class SocketClient {
 
     public static void main(String args[]) {
 
-        if (args.length != 1)
+        if (args.length != 3)
         {
-            System.out.println("Error - Expect 1 param: Download directory.");
+            System.out.println("Error - Expect 3 params: UserID, Key, Download directory.");
             return;
         }
-        // TODO - See if download directory exists
-        // TODO - Append '/' if not there already
+
+        /** Ensure download directory exists **/
+        File f = new File(args[2]);
+        if (!f.exists() || !f.isDirectory())
+        {
+            System.out.println("Given directory could not be found: " + args[2]);
+            return;
+        }
+
         Console console = System.console();
-        SocketClient client = new SocketClient("localhost", 16000, args[0]);
+        SocketClient client = new SocketClient("localhost", 16000, args[0], args[1], args[2]);
         try {
             client.connect();
             client.sendUserID();
