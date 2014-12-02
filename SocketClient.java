@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 
 public class SocketClient {
 
+    private String _dir;
     private Encryption _encrypter;
     private String _hostname;
     private int _port;
@@ -12,10 +13,11 @@ public class SocketClient {
     private String _userID = "Frank";
     private String _key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    public SocketClient(String hostname, int port) {
+    public SocketClient(String hostname, int port, String directory) {
         _hostname = hostname;
         _port = port;
         _encrypter = new Encryption();
+        _dir = directory;
     }
 
     public void connect() throws UnknownHostException, IOException {
@@ -51,7 +53,7 @@ public class SocketClient {
         transmit(_encrypter.encrypt(Statics.ACTION_FINISHED, _key));
     }
 
-    public boolean readFileResponse() throws IOException
+    public boolean readFileResponse(String fileName) throws IOException
     {
         byte[] contents = _encrypter.decrypt(receive(), _key);
 
@@ -60,16 +62,22 @@ public class SocketClient {
             System.out.println("File does not exist");
             return false;
         } else if (new String(contents).startsWith(Statics.RESPONSE_ACK)) {
-            return readFileResponse();
+            return readFileResponse(fileName);
         }
 
 
-        File f = new File("hi.txt"); // TODO - Proper file name
+        File f = new File(_dir + fileName);
         FileOutputStream fout = new FileOutputStream(f);
         fout.write(contents);
         fout.close();
 
-        System.out.println("File transfer successful.");
+        byte[] end = _encrypter.decrypt(receive(), _key);
+        if (new String(end).startsWith(Statics.ACTION_FINISHED))
+            System.out.println("File transfer successful.");
+        else
+            System.out.println("Something funky happened: " + new String(end));
+
+
         return true;
     }
 
@@ -87,8 +95,16 @@ public class SocketClient {
     }
 
     public static void main(String args[]) {
+
+        if (args.length != 1)
+        {
+            System.out.println("Error - Expect 1 param: Download directory.");
+            return;
+        }
+        // TODO - See if download directory exists
+        // TODO - Append '/' if not there already
         Console console = System.console();
-        SocketClient client = new SocketClient("localhost", 16000);
+        SocketClient client = new SocketClient("localhost", 16000, args[0]);
         try {
             client.connect();
             client.sendUserID();
@@ -107,7 +123,7 @@ public class SocketClient {
             while (!(input = console.readLine()).equals("q"))
             {
                 client.sendFileName(input);
-                client.readFileResponse();
+                client.readFileResponse(input);
                 System.out.println("\nPlease enter a file name, or 'q' to quit.");
             }
 

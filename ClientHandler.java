@@ -11,9 +11,6 @@ public class ClientHandler implements Runnable {
     private SocketServer _server;
     private Encryption _encrypter;
 
-
-
-
     public ClientHandler(SocketServer server, Socket client) {
         _server = server;
         _client = client;

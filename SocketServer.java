@@ -20,7 +20,7 @@ public class SocketServer {
         _users = new ArrayList<User>();
 
         _users.add(new User("Frank", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-        _users.add(new User("Stephen", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+        _users.add(new User("Ruth", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
         _users.add(new User("Carl", "cccccccccccccccccccccccccccccccc"));
         _users.add(new User("Scott", "dddddddddddddddddddddddddddddddd"));
     }
