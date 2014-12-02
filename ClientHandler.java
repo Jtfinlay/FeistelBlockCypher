@@ -60,6 +60,7 @@ public class ClientHandler implements Runnable {
                 return;
             } else if (new String(decrypted).startsWith(Statics.ACTION_FINISHED)) {
                 /** ALL DONE! **/
+                u.authenticated = false;
                 _client.close();
                 return;
             }
